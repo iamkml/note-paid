@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern Note Taking App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* Main CSS */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #8c53ff;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    #container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0px 10px 15px 10px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        width: 827px;
+        height: 600px;
+        padding: 20px;
+        box-sizing: border-box;
+        text-align: center;
+        overflow-y: scroll;
+    }
+
+    #list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #nightModeToggle {
+        background: #8c53ff;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    #nightModeToggle:hover {
+        background: #6a34d3;
+    }
+
+    #addNoteDiv {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        height: 200px;
+        width: 200px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #addNoteDiv:hover {
+        background-color: #f1f1f1;
+    }
+
+    #addNoteDiv i {
+        font-size: 70px;
+        color: gainsboro;
+    }
+
+    #list-container {
+        display: flex;
+        justify-content: left;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        text-align: center;
+    }
+
+    li {
+        background-color: #fff385;
+        margin: 10px;
+        padding: 20px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        height: 200px;
+        width: 200px;
+        box-shadow: 9px 9px 18px #b3b3b3, -9px -9px 18px #ffffff;
+    }
+
+    li span {
+        font-size: 12px;
+        flex-grow: 1;
+        word-wrap: break-word;
+        overflow-y: scroll;
+    }
+
+    #editBtn, #deleteBtn {
+        background-color: #c6aaff;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        margin: 5px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+
+    #deleteBtn:hover {
+        background-color: #8c53ff;
+    }
+
+    #editBtn:hover {
+        background-color: gray;
+    }
+
+    /* Popup Styles */
+    .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 300px;
+        background-color: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    textarea {
+        width: 100%;
+        height: 200px;
+        padding: 10px;
+        border-radius: 4px;
+        border: 2px solid #8c53ff;
+    }
+
+    button {
+        width: 100px;
+        background-color: #8c53ff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px;
+        cursor: pointer;
+        margin: 10px;
+    }
+
+    /* Night Mode */
+    .night-mode {
+        background-color: #1e1e1e;
+        color: #ffffff;
+    }
+
+    .night-mode #container {
+        background-color: #2c2c2c;
+    }
+
+    .night-mode li {
+        background-color: #444;
+        color: #fff;
+        box-shadow: 5px 5px 10px #000, -5px -5px 10px #666;
+    }
+
+    .night-mode #addNoteDiv {
+        background-color: #333;
+        border: 1px solid #555;
+    }
+
+    .night-mode .popup {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .night-mode textarea {
+        background-color: #222;
+        color: #fff;
+        border: 2px solid #555;
+    }
+  </style>
+</head>
+<body>
+    <div id="container">
+        <div id="list-header">
+            <button id="nightModeToggle" onclick="toggleNightMode()">🌙 Night Mode</button>
+            <div id="addNoteDiv" onclick="popup()">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+        </div>
+        
+        <div id="list-container">
+            <ul id="notes-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        function toggleNightMode() {
+            document.body.classList.toggle('night-mode');
+            localStorage.setItem('nightMode', document.body.classList.contains('night-mode') ? 'enabled' : 'disabled');
+        }
+
+        function popup() {
+            const popupContainer = document.createElement("div");
+            popupContainer.classList.add("popup");
+            popupContainer.innerHTML = `
+                <h1>New Note</h1>
+                <textarea id="note-text" placeholder="Enter your note..."></textarea>
+                <button onclick="createNote()">Create</button>
+                <button onclick="this.parentElement.remove()">Close</button>
+            `;
+            document.body.appendChild(popupContainer);
+        }
+
+        function createNote() {
+            const noteText = document.getElementById('note-text').value.trim();
+            if (noteText) {
+                const note = { id: Date.now(), text: noteText };
+                const notes = JSON.parse(localStorage.getItem('notes')) || [];
+                notes.push(note);
+                localStorage.setItem('notes', JSON.stringify(notes));
+                document.querySelector('.popup').remove();
+                displayNotes();
+            }
+        }
+
+        function displayNotes() {
+            const notesList = document.getElementById('notes-list');
+            notesList.innerHTML = '';
+            const notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.forEach(note => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span>${note.text}</span>
+                    <button onclick="deleteNote(${note.id})">❌</button>
+                `;
+                notesList.appendChild(listItem);
+            });
+        }
+
+        function deleteNote(noteId) {
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes = notes.filter(note => note.id !== noteId);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            displayNotes();
+        }
+
+        window.onload = function () {
+            if (localStorage.getItem('nightMode') === 'enabled') document.body.classList.add('night-mode');
+            displayNotes();
+        };
+    </script>
+</body>
+</html>
